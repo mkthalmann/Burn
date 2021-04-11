@@ -17,7 +17,7 @@ d_most <- read.csv(here("data", "most.csv"), sep = ";") %>%
     pivot_longer(
         cols = c(
             hanna_most,
-            stine_most,s
+            stine_most,
             lena_most,
             maik_most,
             martha_most,
