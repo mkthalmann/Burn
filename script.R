@@ -66,7 +66,8 @@ p_time <- d_plot %>%
         wins_percent = scales::label_percent(accuracy = 0.01)(wins_cumsum / games_cumsum),
         # only show final win percentage
         wins_percent = if_else(date != max(date), "", wins_percent),
-        date = as.factor(date)
+        date = gsub("2021-", "", as.factor(date)),
+        date = gsub("-", ".", as.factor(date))
     ) %>%
     ggplot(aes(
         x = date,
@@ -74,25 +75,25 @@ p_time <- d_plot %>%
         color = player,
         group = player,
     )) +
-    geom_line() +
-    geom_point(aes(shape = there), alpha = .9, size = 3) +
+    geom_line(alpha = .7, size = .3) +
+    geom_point(aes(shape = there), size = 4, stroke = 1) +
     geom_text(
         aes(
             label = wins_percent,
             x = date,
             y = wins_cumsum
         ),
-        nudge_x = .2,
+        nudge_x = .4,
         hjust = "left",
-        size = 3,
+        size = 4,
         fontface = "bold"
     ) +
     facet_wrap(~player, nrow = 1) +
     guides(color = F, shape = F) +
     labs(
-        subtitle = "Teilnahme am jeweiligen Spieldatum wird durch die Art des Datenpunktes repräsentiert.",
+        subtitle = "Teilnahme am jeweiligen Spieldatum wird durch Art des Datenpunktes angezeigt.",
         x = "Datum",
-        y = "Kumulative gewonnene Spiele"
+        y = "Kumulative gewon. Spiele"
     ) +
     scale_color_manual(values = colors) +
     # scale_x_date(expand = c(.2, .2)) +
@@ -110,7 +111,7 @@ p_rate <- d_plot %>%
         winrate_high = winrate + sciplot::se(wins) * 1.96
     ) %>%
     ggplot(aes(x = player, y = winrate, color = player, group = player)) +
-    geom_point(size = 3, pch = 15) +
+    geom_point(size = 4, pch = 15) +
     geom_errorbar(aes(
         ymin = winrate_low,
         ymax = winrate_high
@@ -120,13 +121,13 @@ p_rate <- d_plot %>%
             label = round(winrate, 2),
             y = winrate
         ),
-        nudge_x = .04,
+        nudge_x = .06,
         hjust = "left",
-        size = 3,
+        size = 4,
         fontface = "bold"
     ) +
     guides(color = F) +
-    theme(axis.text.x = element_text(size = 5 + add, angle = 0)) +
+    theme(axis.text.x = element_text(size = 4 + add, angle = 0)) +
     scale_color_manual(values = colors) +
     labs(
         subtitle = glue(
@@ -142,27 +143,28 @@ p_most <- d_most %>%
     select(player, most_mean, most_max, most_min, most_low, most_high) %>%
     unique() %>%
     ggplot(aes(x = player, y = most_mean, color = player)) +
-    geom_point(shape = 15, size = 3) +
+    geom_point(shape = 15, size = 4) +
     geom_errorbar(
         aes(ymin = most_low, ymax = most_high),
         width = .1,
         alpha = .5
     ) +
-    geom_point(aes(y = most_max), shape = 24, size = 2) +
-    geom_point(aes(y = most_min), shape = 25, size = 2) +
+    geom_point(aes(y = most_max), shape = 24, size = 2.5) +
+    geom_point(aes(y = most_min), shape = 25, size = 2.5) +
     guides(color = F) +
     scale_color_manual(values = colors) +
     theme(axis.text.x = element_text(size = 5 + add, angle = 0)) +
     labs(
         subtitle = "Maximal aufgenommene Karten. Maxima und Minima werden durch Dreiecke dargestellt.",
         x = "Spieler*in",
-        y = "Mittlere Kartenmaxima \u00B1 95% KI"
+        y = "Kartenmaxima \u00B1 95% KI"
     )
 
 p <- p_time / p_rate / p_most + plot_annotation(
     title = glue(
-        "Gewinnübersicht über die bisherigen {unique(d$total)} Burn-Spiele"
+        "♠♥♣♦ Gewinnübersicht über die bisherigen {unique(d$total)} Burn-Spiele ♠♥♣♦"
     ),
+    caption = "Visualization by Maik Thalmann"
 )
 
 ggsave(
