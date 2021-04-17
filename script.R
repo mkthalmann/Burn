@@ -3,6 +3,7 @@ library(hrbrthemes)
 library(here)
 library(glue)
 library(patchwork)
+library(ggtext)
 
 # import the data and compute (daily) total games
 d <- read.csv(here("data", "results.csv"), sep = ";") %>%
@@ -91,7 +92,13 @@ p_time <- d_plot %>%
     facet_wrap(~player, nrow = 1) +
     guides(color = F, shape = F) +
     labs(
-        subtitle = "Teilnahme am jeweiligen Spieldatum wird durch Art des Datenpunktes angezeigt.",
+        subtitle = glue(
+            "**Kumulative Gewinne über insgesamt
+            <span style='color:red;'>{length(unique(d$date))}</span>
+            Spieltage**<br>
+            Teilnahme am jeweiligen Spieldatum
+            wird durch Art des Datenpunktes angezeigt."
+        ),
         x = "Datum",
         y = "Kumulative gewon. Spiele"
     ) +
@@ -128,11 +135,15 @@ p_rate <- d_plot %>%
     ) +
     guides(color = F) +
     theme(axis.text.x = element_text(size = 4 + add, angle = 0)) +
+    scale_y_continuous(limits = c(0, NA)) +
     scale_color_manual(values = colors) +
+    coord_cartesian(clip = "off") +
     labs(
         subtitle = glue(
-            "Abendliche Gewinnrate. Durchschnittlich {round(mean(d$total_day), 2)} Spiele pro Abend."
-            ),
+            "**Abendliche Gewinnrate**<br>
+            Durchschnittlich <span style='color:red;'>{round(mean(d$total_day), 2)}</span>
+            Spiele pro Abend."
+        ),
         x = "Spieler*in",
         y = "Gewinnrate \u00B1 95% KI"
     )
@@ -155,16 +166,23 @@ p_most <- d_most %>%
     scale_color_manual(values = colors) +
     theme(axis.text.x = element_text(size = 5 + add, angle = 0)) +
     labs(
-        subtitle = "Maximal aufgenommene Karten. Maxima und Minima werden durch Dreiecke dargestellt.",
+        subtitle = "**Maximal aufgenommene Karten**
+        <br>
+        Maxima und Minima werden durch Dreiecke dargestellt.",
         x = "Spieler*in",
         y = "Kartenmaxima \u00B1 95% KI"
     )
 
 p <- p_time / p_rate / p_most + plot_annotation(
-    title = glue(
-        "♠♥♣♦ Gewinnübersicht über die bisherigen {unique(d$total)} Burn-Spiele ♠♥♣♦"
+    title = paste(
+        "♠<span style='color:red;'>♥</span>♣<span style='color:red;'>♦</span>",
+        glue(
+            "Gewinnübersicht über die bisherigen {unique(d$total)} Burn-Spiele"
+        ),
+        "♠<span style='color:red;'>♥</span>♣<span style='color:red;'>♦</span>"
     ),
-    caption = "Visualization by Maik Thalmann"
+    caption = "Visualization by Maik Thalmann",
+    theme = theme(plot.title = element_markdown())
 )
 
 ggsave(
@@ -172,6 +190,6 @@ ggsave(
     p,
     device = cairo_pdf,
     width = 36,
-    height = 22.5,
+    height = 28,
     units = "cm"
 )
