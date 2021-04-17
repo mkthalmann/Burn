@@ -131,7 +131,7 @@ p_rate <- d_plot %>%
     scale_color_manual(values = colors) +
     labs(
         subtitle = glue(
-            "Abendliche Gewinnrate. Durchschnittlich {mean(d$total_day)} Spiele pro Abend."
+            "Abendliche Gewinnrate. Durchschnittlich {round(mean(d$total_day), 2)} Spiele pro Abend."
             ),
         x = "Spieler*in",
         y = "Gewinnrate \u00B1 95% KI"
