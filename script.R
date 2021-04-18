@@ -66,9 +66,14 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         group_by(player) %>%
         mutate(
             wins_cumsum = cumsum(wins),
-            wins_percent = scales::label_percent(accuracy = 0.01)(wins_cumsum / games_cumsum),
+            wins_percent = scales::label_percent(accuracy = 0.1)(wins_cumsum / games_cumsum),
             # only show final win percentage
             wins_percent = if_else(date != max(date), "", wins_percent),
+            wins_cumsum_label = if_else(
+                date != max(date),
+                "",
+                as.character(wins_cumsum)
+            ),
             date = gsub("2021-", "", as.factor(date)),
             date = gsub("-", ".", as.factor(date))
         ) %>%
@@ -83,6 +88,18 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         geom_text(
             aes(
                 label = wins_percent,
+                x = date,
+                y = wins_cumsum
+            ),
+            nudge_x = .4,
+            nudge_y = -2,
+            hjust = "left",
+            size = 4,
+            fontface = "bold"
+        ) +
+        geom_text(
+            aes(
+                label = wins_cumsum_label,
                 x = date,
                 y = wins_cumsum
             ),
@@ -163,8 +180,18 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             width = .1,
             alpha = .5
         ) +
-        geom_point(aes(y = most_max), shape = 24, size = 2.5, position = position_nudge(x = -.1)) +
-        geom_point(aes(y = most_min), shape = 25, size = 2.5, position = position_nudge(x = -.1)) +
+        geom_point(
+            aes(y = most_min),
+            shape = 25,
+            size = 2.5,
+            position = position_nudge(x = -.1)
+        ) +
+        geom_point(
+            aes(y = most_max),
+            shape = 24,
+            size = 2.5,
+            position = position_nudge(x = -.1)
+        ) +
         guides(color = F) +
         scale_color_manual(values = colors) +
         scale_y_continuous(limits = c(0, NA)) +
