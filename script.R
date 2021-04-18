@@ -27,6 +27,7 @@ d_most <- read.csv(here("data", "most.csv"), sep = ";") %>%
         most = as.double(most),
         most = if_else(is.na(most), 0, most)
     ) %>%
+    filter(most != 0) %>%
     group_by(player) %>%
     mutate(
         most_mean = mean(most, na.rm = TRUE),
@@ -144,6 +145,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             subtitle = glue(
                 "**Abendliche Gewinnrate**<br>
             Durchschnittlich <span style='color:red;'>{round(mean(d_plot$total_day), 2)}</span>
+            (Median <span style='color:red;'>{round(median(d_plot$total_day), 2)}</span>)
             Spiele pro Abend."
             ),
             x = "☺ Spieler*in ☺",
@@ -152,7 +154,6 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
 
     # most drawn cards
     p_most <- d_most %>%
-        filter(most != 0) %>%
         select(player, most_mean, most_max, most_min, most_low, most_high) %>%
         unique() %>%
         ggplot(aes(x = player, y = most_mean, color = player)) +
@@ -162,10 +163,21 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             width = .1,
             alpha = .5
         ) +
-        geom_point(aes(y = most_max), shape = 24, size = 2.5) +
-        geom_point(aes(y = most_min), shape = 25, size = 2.5) +
+        geom_point(aes(y = most_max), shape = 24, size = 2.5, position = position_nudge(x = -.1)) +
+        geom_point(aes(y = most_min), shape = 25, size = 2.5, position = position_nudge(x = -.1)) +
         guides(color = F) +
         scale_color_manual(values = colors) +
+        scale_y_continuous(limits = c(0, NA)) +
+        geom_text(
+            aes(
+                label = round(most_mean, 2),
+                y = most_mean
+            ),
+            nudge_x = .06,
+            hjust = "left",
+            size = 4,
+            fontface = "bold"
+        ) +
         theme(axis.text.x = element_text(size = 5 + add, angle = 0)) +
         labs(
             subtitle = "**Maximal aufgenommene Karten**
