@@ -113,7 +113,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         labs(
             subtitle = glue(
                 "**Kumulative Gewinne über insgesamt
-            <span style='color:red;'>{length(unique(d$date))}</span>
+            <span style='color:gray;'>{length(unique(d$date))}</span>
             Spieltage**<br>
             Teilnahme am jeweiligen Spieldatum
             wird durch Art des Datenpunktes angezeigt (× abwesend)."
@@ -161,8 +161,8 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         labs(
             subtitle = glue(
                 "**Abendliche Gewinnrate**<br>
-            Durchschnittlich <span style='color:red;'>{round(mean(d_plot$total_day), 2)}</span>
-            (Median <span style='color:red;'>{round(median(d_plot$total_day), 2)}</span>)
+            Durchschnittlich <span style='color:gray;'>{round(mean(d_plot$total_day), 2)}</span>
+            (Median <span style='color:gray;'>{round(median(d_plot$total_day), 2)}</span>)
             Spiele pro Abend."
             ),
             x = "☺ Spieler*in ☺",
@@ -216,11 +216,11 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
 
     p <- p_time / p_rate / p_most + plot_annotation(
         title = paste(
-            "♠<span style='color:red;'>♥</span>♣<span style='color:red;'>♦</span>",
+            "♠<span style='color:gray;'>♥</span>♣<span style='color:gray;'>♦</span>",
             glue(
                 "Gewinnübersicht über die bisherigen {unique(d_plot$total)} Burn-Spiele"
             ),
-            "♠<span style='color:red;'>♥</span>♣<span style='color:red;'>♦</span>"
+            "♠<span style='color:gray;'>♥</span>♣<span style='color:gray;'>♦</span>"
         ),
         caption = "Visualization by Maik Thalmann",
         theme = theme(plot.title = element_markdown())
