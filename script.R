@@ -59,6 +59,11 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             wins = as.double(wins),
             there = if_else(is.na(wins), "no", "yes"),
             wins = if_else(is.na(wins), 0, wins)
+            ) %>%
+        group_by(player) %>%
+        mutate(
+            # how many games did each player participate in?
+            games_part = sum(ifelse(there == "yes", total_day, 0))
         )
 
     # cumulative wins over time
@@ -72,7 +77,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             wins_cumsum_label = if_else(
                 date != max(date),
                 "",
-                as.character(wins_cumsum)
+                as.character(glue("{wins_cumsum}/{games_part}"))
             ),
             date = gsub("2021-", "", as.factor(date)),
             date = gsub("-", ".", as.factor(date))
