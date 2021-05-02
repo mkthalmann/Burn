@@ -4,6 +4,7 @@ library(here)
 library(glue)
 library(patchwork)
 library(ggtext)
+library(scales)
 
 # import the data and compute (daily) total games
 d <- read.csv(here("data", "results.csv"), sep = ";")
@@ -59,7 +60,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             wins = as.double(wins),
             there = if_else(is.na(wins), "no", "yes"),
             wins = if_else(is.na(wins), 0, wins)
-            ) %>%
+        ) %>%
         group_by(player) %>%
         mutate(
             # how many games did each player participate in?
@@ -114,7 +115,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             fontface = "bold"
         ) +
         facet_wrap(~player, nrow = 1) +
-        guides(color = F, shape = F) +
+        guides(color = FALSE, shape = FALSE) +
         labs(
             subtitle = glue(
                 "**Kumulative Gewinne über insgesamt
@@ -158,9 +159,9 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             size = 4,
             fontface = "bold"
         ) +
-        guides(color = F) +
+        guides(color = FALSE) +
         theme(axis.text.x = element_text(size = 4 + add, angle = 0)) +
-        scale_y_continuous(limits = c(0, NA)) +
+        scale_y_continuous(limits = c(0, NA), oob = rescale_none) +
         scale_color_manual(values = colors) +
         coord_cartesian(clip = "off") +
         labs(
@@ -186,20 +187,21 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             alpha = .5
         ) +
         geom_point(
-            aes(y = most_min),
+            aes(y = most_min, fill = player),
             shape = 25,
-            size = 2.5,
-            position = position_nudge(x = -.1)
+            size = 2.4,
+            alpha = .5
         ) +
         geom_point(
-            aes(y = most_max),
+            aes(y = most_max, fill = player),
             shape = 24,
-            size = 2.5,
-            position = position_nudge(x = -.1)
+            size = 2.4,
+            alpha = .5
         ) +
-        guides(color = F) +
+        guides(color = FALSE, fill = FALSE) +
         scale_color_manual(values = colors) +
-        scale_y_continuous(limits = c(0, NA)) +
+        scale_fill_manual(values = colors) +
+        scale_y_continuous(limits = c(0, NA), oob = rescale_none) +
         geom_text(
             aes(
                 label = round(most_mean, 2),
