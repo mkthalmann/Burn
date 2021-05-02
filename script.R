@@ -116,6 +116,10 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         ) +
         facet_wrap(~player, nrow = 1) +
         guides(color = FALSE, shape = FALSE) +
+        theme(
+            axis.title.y = element_markdown(),
+            axis.text.x = element_text(size = 5 + add, angle = 90)
+        ) +
         labs(
             subtitle = glue(
                 "**Kumulative Gewinne über insgesamt
@@ -125,7 +129,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             wird durch Art des Datenpunktes angezeigt (× abwesend)."
             ),
             x = "◴ Datum ◴",
-            y = "✓ Kumulative Siege"
+            y = "✓ Kumulative<br>Gewinne"
         ) +
         scale_color_manual(values = colors) +
         # scale_x_date(expand = c(.2, .2)) +
@@ -160,7 +164,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             fontface = "bold"
         ) +
         guides(color = FALSE) +
-        theme(axis.text.x = element_text(size = 4 + add, angle = 0)) +
+        theme(axis.title.y = element_markdown()) +
         scale_y_continuous(limits = c(0, NA), oob = rescale_none) +
         scale_color_manual(values = colors) +
         coord_cartesian(clip = "off") +
@@ -172,7 +176,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             Spiele pro Abend."
             ),
             x = "☺ Spieler*in ☺",
-            y = "✓ Gewinnrate \u00B1 95% KI"
+            y = "✓ Gewinnrate<br>\u00B1 95% KonfInt"
         )
 
     # most drawn cards
@@ -212,13 +216,13 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             size = 4,
             fontface = "bold"
         ) +
-        theme(axis.text.x = element_text(size = 5 + add, angle = 0)) +
+        theme(axis.title.y = element_markdown()) +
         labs(
             subtitle = "**Maximal aufgenommene Karten**
         <br>
         Maxima und Minima werden durch Dreiecke dargestellt.",
             x = "☺ Spieler*in ☺",
-            y = "Kartenmaxima \u00B1 95% KI"
+            y = "Kartenmaxima<br>\u00B1 95% KonfInt"
         )
 
     p <- p_time / p_rate / p_most + plot_annotation(
