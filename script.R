@@ -229,7 +229,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         title = paste(
             "♠<span style='color:gray;'>♥</span>♣<span style='color:gray;'>♦</span>",
             glue(
-                "Gewinnübersicht über die bisherigen {unique(d_plot$total)} Burn-Spiele"
+                "Gewinnübersicht über die bisherigen <span style='color:gray;'>{unique(d_plot$total)}</span> Burn-Spiele"
             ),
             "♠<span style='color:gray;'>♥</span>♣<span style='color:gray;'>♦</span>"
         ),
