@@ -7,7 +7,29 @@ library(ggtext)
 library(scales)
 
 # import the data and compute (daily) total games
-d <- read.csv(here("data", "results.csv"), sep = ";")
+d_plot <- read.csv(here("data", "results.csv"), sep = ";") %>%
+    mutate(
+        date = as.Date(date, format = "%d.%m.%Y"),
+        total_day = rowSums(across(where(is.numeric)), na.rm = T),
+        total = sum(total_day),
+        games_cumsum = cumsum(total_day)
+    ) %>%
+    pivot_longer(
+        cols = !c(date, total_day, total, games_cumsum),
+        names_to = "player",
+        values_to = "wins"
+    ) %>%
+    mutate(
+        player = str_to_title(player),
+        wins = as.double(wins),
+        there = if_else(is.na(wins), "no", "yes"),
+        wins = if_else(is.na(wins), 0, wins)
+    ) %>%
+    group_by(player) %>%
+    mutate(
+        # how many games did each player participate in?
+        games_part = sum(ifelse(there == "yes", total_day, 0))
+    )
 
 # import data with the most cards drawn per day (only for online sessions)
 d_most <- read.csv(here("data", "most.csv"), sep = ";") %>%
@@ -41,32 +63,7 @@ d_most <- read.csv(here("data", "most.csv"), sep = ";") %>%
 # source my custom theme
 source(here("theme.R"))
 
-plot_panel <- function(d, d_most, card_shapes = FALSE) {
-    # further data transformations
-    d_plot <- d %>%
-        mutate(
-            date = as.Date(date, format = "%d.%m.%Y"),
-            total_day = rowSums(across(where(is.numeric)), na.rm = T),
-            total = sum(total_day),
-            games_cumsum = cumsum(total_day)
-        ) %>%
-        pivot_longer(
-            cols = !c(date, total_day, total, games_cumsum),
-            names_to = "player",
-            values_to = "wins"
-        ) %>%
-        mutate(
-            player = str_to_title(player),
-            wins = as.double(wins),
-            there = if_else(is.na(wins), "no", "yes"),
-            wins = if_else(is.na(wins), 0, wins)
-        ) %>%
-        group_by(player) %>%
-        mutate(
-            # how many games did each player participate in?
-            games_part = sum(ifelse(there == "yes", total_day, 0))
-        )
-
+plot_panel <- function(d_plot, d_most, pnt_size = 4) {
     # cumulative wins over time
     p_time <- d_plot %>%
         group_by(player) %>%
@@ -89,16 +86,16 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
             color = player,
             group = player
         )) +
-        geom_line(alpha = .7, size = .3) +
-        geom_point(aes(shape = there), size = 4, stroke = 1) +
+        geom_line(alpha = .8, size = .2) +
+        geom_point(aes(shape = there), size = pnt_size, stroke = 1) +
         geom_text(
             aes(
                 label = wins_percent,
                 x = date,
                 y = wins_cumsum
             ),
-            nudge_x = .4,
-            nudge_y = -2,
+            nudge_x = .6,
+            nudge_y = -2.4,
             hjust = "left",
             size = 4,
             fontface = "bold"
@@ -109,7 +106,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
                 x = date,
                 y = wins_cumsum
             ),
-            nudge_x = .4,
+            nudge_x = .6,
             hjust = "left",
             size = 4,
             fontface = "bold"
@@ -118,7 +115,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         guides(color = FALSE, shape = FALSE) +
         theme(
             axis.title.y = element_markdown(),
-            axis.text.x = element_text(size = 5 + add, angle = 90)
+            axis.text.x = element_text(size = 12, angle = 90)
         ) +
         labs(
             subtitle = glue(
@@ -152,7 +149,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         geom_errorbar(aes(
             ymin = winrate_low,
             ymax = winrate_high
-        ), width = .1, alpha = .5) +
+        ), width = .05, alpha = .5) +
         geom_text(
             aes(
                 label = round(winrate, 2),
@@ -187,7 +184,7 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
         geom_point(shape = 15, size = 4) +
         geom_errorbar(
             aes(ymin = most_low, ymax = most_high),
-            width = .1,
+            width = .05,
             alpha = .5
         ) +
         geom_point(
@@ -240,12 +237,11 @@ plot_panel <- function(d, d_most, card_shapes = FALSE) {
     p
 }
 
-p_all <- plot_panel(d, d_most)
+p_all <- plot_panel(d_plot, d_most, pnt_size = 2)
 
 p_freq <- plot_panel(
-    select(d, -martha, -lotti),
-    filter(d_most, player != "Martha", player != "Lotti"),
-    card_shapes = TRUE
+    filter(d_plot, player != "Martha", player != "Lotti"),
+    filter(d_most, player != "Martha", player != "Lotti")
 )
 
 walk2(
@@ -263,3 +259,8 @@ walk2(
         units = "cm"
     )
 )
+
+# export the data
+d_plot %>%
+    left_join(d_most, by = c("date", "player")) %>%
+    write_csv(here("data", "burn-all.csv"))
