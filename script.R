@@ -5,6 +5,7 @@ library(glue)
 library(patchwork)
 library(ggtext)
 library(scales)
+library(lubridate)
 
 # import the data and compute (daily) total games
 d_plot <- read.csv(here("data", "results.csv"), sep = ";") %>%
@@ -28,8 +29,13 @@ d_plot <- read.csv(here("data", "results.csv"), sep = ";") %>%
     group_by(player) %>%
     mutate(
         # how many games did each player participate in?
-        games_part = sum(ifelse(there == "yes", total_day, 0))
-    )
+        games_part = sum(ifelse(there == "yes", total_day, 0)),
+        year = year(date),
+        month = month(date, label = TRUE),
+        day = day(date),
+        week_day = wday(date, label = TRUE),
+    ) %>%
+    relocate(date, year, month, day, week_day)
 
 # import data with the most cards drawn per day (only for online sessions)
 d_most <- read.csv(here("data", "most.csv"), sep = ";") %>%
@@ -63,6 +69,7 @@ d_most <- read.csv(here("data", "most.csv"), sep = ";") %>%
 # source my custom theme
 source(here("theme.R"))
 
+# generic plotting function for the two variants of the plot
 plot_panel <- function(d_plot, d_most, pnt_size = 4) {
     # cumulative wins over time
     p_time <- d_plot %>%
@@ -120,7 +127,7 @@ plot_panel <- function(d_plot, d_most, pnt_size = 4) {
         labs(
             subtitle = glue(
                 "**Kumulative Gewinne über insgesamt
-            <span style='color:gray;'>{length(unique(d$date))}</span>
+            <span style='color:gray;'>{length(unique(d_plot$date))}</span>
             Spieltage**<br>
             Teilnahme am jeweiligen Spieldatum
             wird durch Art des Datenpunktes angezeigt (× abwesend)."
@@ -244,6 +251,7 @@ p_freq <- plot_panel(
     filter(d_most, player != "Martha", player != "Lotti")
 )
 
+# save the plots
 walk2(
     c(
         here("images", "time.pdf"),
@@ -256,7 +264,8 @@ walk2(
         device = cairo_pdf,
         width = 36,
         height = 28,
-        units = "cm"
+        units = "cm",
+        dpi = "retina"
     )
 )
 
