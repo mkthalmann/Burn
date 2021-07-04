@@ -66,11 +66,14 @@ d_most <- read.csv(here("data", "most.csv"), sep = ";") %>%
         most_high = most_mean + sciplot::se(most) * 1.96
     )
 
+# get the number of months played
+months_played <- round(as.numeric(max(d_plot$date) - min(d_plot$date)) / 30.417, 1)
+
 # source my custom theme
 source(here("theme.R"))
 
 # generic plotting function for the two variants of the plot
-plot_panel <- function(d_plot, d_most, pnt_size = 4) {
+plot_panel <- function(d_plot, d_most, pnt_size = 3) {
     # cumulative wins over time
     p_time <- d_plot %>%
         group_by(player) %>%
@@ -122,13 +125,13 @@ plot_panel <- function(d_plot, d_most, pnt_size = 4) {
         guides(color = FALSE, shape = FALSE) +
         theme(
             axis.title.y = element_markdown(),
-            axis.text.x = element_text(size = 12, angle = 90)
+            axis.text.x = element_text(size = 11, angle = 90)
         ) +
         labs(
             subtitle = glue(
                 "**Kumulative Gewinne über insgesamt
             <span style='color:gray;'>{length(unique(d_plot$date))}</span>
-            Spieltage**<br>
+            Spieltage (über <span style='color:gray;'>~{months_played}</span> Monate)**<br>
             Teilnahme am jeweiligen Spieldatum
             wird durch Art des Datenpunktes angezeigt (× abwesend)."
             ),
@@ -176,6 +179,7 @@ plot_panel <- function(d_plot, d_most, pnt_size = 4) {
             subtitle = glue(
                 "**Abendliche Gewinnrate**<br>
             Durchschnittlich <span style='color:gray;'>{round(mean(d_plot$total_day), 2)}</span>
+            \u00B1 <span style='color:gray;'>{round(sd(d_plot$total_day), 2)}</span>
             (Median <span style='color:gray;'>{round(median(d_plot$total_day), 2)}</span>)
             Spiele pro Abend."
             ),
@@ -224,7 +228,7 @@ plot_panel <- function(d_plot, d_most, pnt_size = 4) {
         labs(
             subtitle = "**Maximal aufgenommene Karten**
         <br>
-        Maxima und Minima werden durch Dreiecke dargestellt.",
+        Maxima und Minima (der Maxima) werden durch Dreiecke dargestellt.",
             x = "☺ Spieler*in ☺",
             y = "Kartenmaxima<br>\u00B1 95% KonfInt"
         )
@@ -237,8 +241,11 @@ plot_panel <- function(d_plot, d_most, pnt_size = 4) {
             ),
             "♠<span style='color:gray;'>♥</span>♣<span style='color:gray;'>♦</span>"
         ),
-        caption = "Visualization by Maik Thalmann",
-        theme = theme(plot.title = element_markdown())
+        caption = glue("Visualization by Maik Thalmann<br>Version: {today()}"),
+        theme = theme(
+            plot.title = element_markdown(),
+            plot.caption = element_markdown(),
+        )
     )
 
     p
@@ -262,7 +269,7 @@ walk2(
         filename = .x,
         plot = .y,
         device = cairo_pdf,
-        width = 36,
+        width = 38,
         height = 28,
         units = "cm",
         dpi = "retina"
