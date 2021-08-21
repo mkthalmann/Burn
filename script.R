@@ -105,7 +105,7 @@ plot_panel <- function(d_plot, d_most, pnt_size = 3) {
                 y = wins_cumsum
             ),
             nudge_x = .6,
-            nudge_y = -2.4,
+            nudge_y = -3.5,
             hjust = "left",
             size = 4,
             fontface = "bold"
@@ -122,7 +122,7 @@ plot_panel <- function(d_plot, d_most, pnt_size = 3) {
             fontface = "bold"
         ) +
         facet_wrap(~player, nrow = 1) +
-        guides(color = FALSE, shape = FALSE) +
+        guides(color = "none", shape = "none") +
         theme(
             axis.title.y = element_markdown(),
             axis.text.x = element_text(size = 11, angle = 90)
@@ -131,7 +131,7 @@ plot_panel <- function(d_plot, d_most, pnt_size = 3) {
             subtitle = glue(
                 "**Kumulative Gewinne über insgesamt
             <span style='color:gray;'>{length(unique(d_plot$date))}</span>
-            Spieltage (über <span style='color:gray;'>~{months_played}</span> Monate)**<br>
+            Spieltage in <span style='color:gray;'>~{months_played}</span> Monaten**<br>
             Teilnahme am jeweiligen Spieldatum
             wird durch Art des Datenpunktes angezeigt (× abwesend)."
             ),
@@ -170,7 +170,7 @@ plot_panel <- function(d_plot, d_most, pnt_size = 3) {
             size = 4,
             fontface = "bold"
         ) +
-        guides(color = FALSE) +
+        guides(color = "none") +
         theme(axis.title.y = element_markdown()) +
         scale_y_continuous(limits = c(0, NA), oob = rescale_none) +
         scale_color_manual(values = colors) +
@@ -210,7 +210,7 @@ plot_panel <- function(d_plot, d_most, pnt_size = 3) {
             size = 2.4,
             alpha = .5
         ) +
-        guides(color = FALSE, fill = FALSE) +
+        guides(color = "none", fill = "none") +
         scale_color_manual(values = colors) +
         scale_fill_manual(values = colors) +
         scale_y_continuous(limits = c(0, NA), oob = rescale_none) +
